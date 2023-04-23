@@ -1,0 +1,9 @@
+.comment-input {
+    position: sticky;
+    top: 0px;
+}
+
+.editor-cover {
+    width: calc(100% - 40px)
+}
+
