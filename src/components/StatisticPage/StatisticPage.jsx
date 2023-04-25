@@ -3,13 +3,14 @@ import { Card } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { BASE_URL } from '../../constant';
 const StatisticPage = () => {
   const params = useParams();
   const [groups, setGroups] = useState();
   console.log({groups})
   const fetchTaskGroups = async () => {
     await axios
-      .get(`http://localhost:5000/projects/${params.projectId}/tasks`, {params: {groupBy: "STATUS"}})
+      .get(`${BASE_URL}/projects/${params.projectId}/tasks`, {params: {groupBy: "STATUS"}})
       .then((res) => {
         console.log("A", res.data.tasks)
         setGroups(res.data.tasks);

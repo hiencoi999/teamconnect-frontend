@@ -23,6 +23,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import React, { useEffect, useRef, useState } from 'react';
 import { DragDropContext, Draggable } from 'react-beautiful-dnd';
 import Highlighter from 'react-highlight-words';
+import { BASE_URL } from '../../constant';
 import { StrictModeDroppable as Droppable } from '../../hooks/useStrictModeDroppable';
 import TaskDetail from '../TaskDetail/TaskDetail';
 import { getColorPriority } from '../TaskDetail/TaskDetail.config';
@@ -53,7 +54,7 @@ const BoardView = ({ project, members, socket }) => {
       const [movedItem] = columns.splice(source.index, 1);
       columns.splice(destination.index, 0, movedItem);
       await axios
-        .put(`http://localhost:5000/projects/${projectId}/groups`, {
+        .put(`${BASE_URL}/projects/${projectId}/groups`, {
           columns,
           groupBy: groupBy.current,
         })
@@ -74,7 +75,7 @@ const BoardView = ({ project, members, socket }) => {
         destColumn.tasks.splice(destination.index, 0, movedItem);
         console.log({ columns });
         await axios
-          .put(`http://localhost:5000/projects/${projectId}/tasks`, {
+          .put(`${BASE_URL}/projects/${projectId}/tasks`, {
             columns,
             groupBy: groupBy.current,
             taskId: movedItem._id,
@@ -92,7 +93,7 @@ const BoardView = ({ project, members, socket }) => {
         sourceColumn.tasks.splice(destination.index, 0, movedItem);
 
         await axios
-          .put(`http://localhost:5000/projects/${projectId}/tasks`, {
+          .put(`${BASE_URL}/projects/${projectId}/tasks`, {
             columns,
             groupBy: groupBy.current,
             taskId: movedItem._id,
@@ -118,7 +119,7 @@ const BoardView = ({ project, members, socket }) => {
 
   const handleCreateTask = async () => {
     await axios
-      .post(`http://localhost:5000/projects/${projectId}/tasks`, {
+      .post(`${BASE_URL}/projects/${projectId}/tasks`, {
         title: taskTitle,
       })
       .then((res) => {
@@ -133,7 +134,7 @@ const BoardView = ({ project, members, socket }) => {
 
   const fetchTaskGroups = async () => {
     await axios
-      .get(`http://localhost:5000/projects/${projectId}/tasks`, {
+      .get(`${BASE_URL}/projects/${projectId}/tasks`, {
         params: { groupBy: groupBy.current },
       })
       .then((res) => {
@@ -160,7 +161,7 @@ const BoardView = ({ project, members, socket }) => {
 
   const handleCreateNewGroup = async () => {
     await axios
-      .post(`http://localhost:5000/projects/${projectId}/groups`, {
+      .post(`${BASE_URL}/projects/${projectId}/groups`, {
         name: groupName,
       })
       .then((res) => {
@@ -174,7 +175,7 @@ const BoardView = ({ project, members, socket }) => {
 
   const onDeleteGroup = async (groupId) => {
     await axios
-      .delete(`http://localhost:5000/projects/${projectId}/groups/${groupId}`)
+      .delete(`${BASE_URL}/projects/${projectId}/groups/${groupId}`)
       .then((res) => {
         fetchTaskGroups();
       })

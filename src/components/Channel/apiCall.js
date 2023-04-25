@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { BASE_URL } from '../../constant';
 
 export async function getPresignedUrlFromChannel(channelId, fileName) {
   const url = axios
-    .post(`http://localhost:5000/channels/${channelId}`, { fileName })
+    .post(`${BASE_URL}/channels/${channelId}`, { fileName })
     .then((res) => {
       return res.data.url;
     })
@@ -13,7 +14,7 @@ export async function getPresignedUrlFromChannel(channelId, fileName) {
 export async function createMessage(channelId, description) {
   const res = await axios
   .post(
-    `http://localhost:5000/channels/${channelId}/messages`,
+    `${BASE_URL}/channels/${channelId}/messages`,
     { description },
   )
   .then((res) => {
@@ -26,7 +27,7 @@ return res;
 export async function fetchNextMessage(channelId, page) {
   const messages = await axios
     .get(
-      `http://localhost:5000/channels/${channelId}/messages`,
+      `${BASE_URL}/channels/${channelId}/messages`,
       { params: { page } },
     )
     .then((res) => {

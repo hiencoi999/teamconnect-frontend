@@ -6,6 +6,7 @@ import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import BoardView from '../../components/BoardView/BoardView';
 import ProjectSetting from '../../components/ProjectSetting/ProjectSetting';
 import StatisticPage from '../../components/StatisticPage/StatisticPage';
+import { BASE_URL } from '../../constant';
 function capitalizeFirstLetter(string) {
   return string ? string.charAt(0).toUpperCase() + string.slice(1) : null;
 }
@@ -20,7 +21,7 @@ const ProjectDetail = () => {
 
   const fetchProjectDetail = async () => {
     await axios
-      .get(`http://localhost:5000/projects/${projectId}`)
+      .get(`${BASE_URL}/projects/${projectId}`)
       .then((res) => {
         setProject(res.data.project);
         setMembers(res.data.members);

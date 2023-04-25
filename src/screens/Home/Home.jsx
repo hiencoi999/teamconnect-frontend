@@ -27,6 +27,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useNavigate, useParams } from 'react-router-dom';
 import Channel from '../../components/Channel/Channel';
 import NotificationDrawer from '../../components/Notification/NotificationDrawer';
+import { BASE_URL } from '../../constant';
 import useAuth from '../../hooks/useAuth';
 import './Home.css';
 const { Header, Content, Sider } = Layout;
@@ -153,7 +154,7 @@ const Home = ({ socket }) => {
 
   async function fetchProjects() {
     await axios
-      .get('http://localhost:5000/projects')
+      .get(`${BASE_URL}/projects`)
       .then((res) => {
         setProjects(res.data);
       })
@@ -164,7 +165,7 @@ const Home = ({ socket }) => {
 
   async function fetchChannels() {
     await axios
-      .get('http://localhost:5000/channels')
+      .get(`${BASE_URL}/channels`)
       .then((res) => {
         setChannels(res.data.channels);
       })
@@ -175,7 +176,7 @@ const Home = ({ socket }) => {
 
   async function fetchNotifications() {
     await axios
-      .get(`http://localhost:5000/user/invitation`)
+      .get(`${BASE_URL}/user/invitation`)
       .then((res) => {
         setNotifications(res.data.invitations);
         setCountNotification(res.data.invitations.length);
@@ -208,7 +209,7 @@ const Home = ({ socket }) => {
 
   async function onCreateProject({ projectName, projectDescription }) {
     await axios
-      .post('http://localhost:5000/projects', {
+      .post(`${BASE_URL}/projects`, {
         projectName,
         projectDescription,
       })
@@ -226,7 +227,7 @@ const Home = ({ socket }) => {
 
   async function onCreateChannel({ projectId, channelName }) {
     await axios
-      .post('http://localhost:5000/channels', { projectId, channelName })
+      .post(`${BASE_URL}/channels`, { projectId, channelName })
       .then((res) => {
         setOpenCreateChannel(false);
         fetchChannels();

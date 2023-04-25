@@ -31,6 +31,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import parse from 'html-react-parser';
 import { useEffect, useState } from 'react';
 import { FileIcon, defaultStyles } from 'react-file-icon';
+import { BASE_URL } from '../../constant';
 import { dummyRequest, getColorPriority, priority } from './TaskDetail.config';
 import './TaskDetail.css';
 import {
@@ -80,7 +81,7 @@ export default function TaskDetail({
   const fetchComments = async () => {
     await axios
       .get(
-        `http://localhost:5000/projects/${projectId}/tasks/${taskId}/comments`,
+        `${BASE_URL}/projects/${projectId}/tasks/${taskId}/comments`,
         { params: { page: page.current } },
       )
       .then((res) => {
@@ -97,7 +98,7 @@ export default function TaskDetail({
 
   const fetchStatus = async () => {
     await axios
-      .get(`http://localhost:5000/projects/${projectId}/groups`)
+      .get(`${BASE_URL}/projects/${projectId}/groups`)
       .then((res) => setStatusGroup(res.data.groups))
       .catch((error) => console.log(error));
   };

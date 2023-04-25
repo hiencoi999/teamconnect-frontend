@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BASE_URL } from "../../constant";
 import useAuth from "../../hooks/useAuth";
 
 // https://developers.google.com/identity/gsi/web/reference/js-reference
@@ -14,7 +15,7 @@ const Login = ({socket}) => {
   const handleGoogle = async (response) => {
     
     setLoading(true);
-    fetch("http://localhost:5000/login", {
+    fetch(`${BASE_URL}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

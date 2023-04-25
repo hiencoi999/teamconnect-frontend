@@ -12,6 +12,7 @@ import {
 import axios from 'axios';
 import moment from 'moment';
 import { Link, useOutletContext } from 'react-router-dom';
+import { BASE_URL } from '../../constant';
 const { Meta } = Card;
 
 const Projects = () => {
@@ -20,7 +21,7 @@ const Projects = () => {
 
   async function handleDeleteProject(projectId) {
     await axios
-      .delete(`http://localhost:5000/projects/${projectId}`)
+      .delete(`${BASE_URL}/projects/${projectId}`)
       .then((res) => {
         fetchProjects();
       })

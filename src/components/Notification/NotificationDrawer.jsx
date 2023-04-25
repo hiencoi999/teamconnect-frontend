@@ -2,6 +2,7 @@ import { BellOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { Button, Drawer, List, Typography } from "antd";
 import axios from "axios";
 import moment from "moment/moment";
+import { BASE_URL } from "../../constant";
 const { Text } = Typography;
 
 const NotificationDrawer = (props) => {
@@ -9,7 +10,7 @@ const NotificationDrawer = (props) => {
   const onRefuseInvitation = async (invitationId) => {
     console.log(invitationId);
     await axios
-      .delete(`http://localhost:5000/user/invitation/${invitationId}`)
+      .delete(`${BASE_URL}/user/invitation/${invitationId}`)
       .then((res) => {
         props.fetchNotifications()
       })
@@ -20,7 +21,7 @@ const NotificationDrawer = (props) => {
 
   const onAcceptInvitation = async (invitationId) => {
     await axios
-      .post(`http://localhost:5000/user/invitation/${invitationId}`)
+      .post(`${BASE_URL}/user/invitation/${invitationId}`)
       .then((res) => {
         props.fetchNotifications()
         props.fetchProjects()

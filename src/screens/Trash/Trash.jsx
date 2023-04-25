@@ -3,6 +3,7 @@ import { Avatar, Card, Empty, message, Popconfirm, Space, Tooltip } from 'antd';
 import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
+import { BASE_URL } from '../../constant';
 const { Meta } = Card;
 
 const Trash = () => {
@@ -13,7 +14,7 @@ const Trash = () => {
   useEffect(() => {
     async function fetchDeletedProject() {
       await axios
-        .get('http://localhost:5000/projects/deleted')
+        .get(`${BASE_URL}/projects/deleted`)
         .then((res) => {
           setDeletedProjects(res.data.data);
         })

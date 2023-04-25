@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { BASE_URL } from '../../constant';
 
 export async function fetchTask(projectId, taskId, setTask) {
   await axios
-    .get(`http://localhost:5000/projects/${projectId}/tasks/${taskId}`)
+    .get(`${BASE_URL}/projects/${projectId}/tasks/${taskId}`)
     .then((res) => {
       setTask(res.data.task);
     })
@@ -11,7 +12,7 @@ export async function fetchTask(projectId, taskId, setTask) {
 
 export async function fetchFiles(projectId, taskId, setFileList) {
   await axios
-    .get(`http://localhost:5000/projects/${projectId}/tasks/${taskId}/files`)
+    .get(`${BASE_URL}/projects/${projectId}/tasks/${taskId}/files`)
     .then((res) => {
       const files = res.data.files.map((file) => {
         return {
@@ -29,7 +30,7 @@ export async function fetchFiles(projectId, taskId, setFileList) {
 export async function deleteFile(projectId, taskId, fileId) {
   const res = await axios
     .delete(
-      `http://localhost:5000/projects/${projectId}/tasks/${taskId}/files/${fileId}`,
+      `${BASE_URL}/projects/${projectId}/tasks/${taskId}/files/${fileId}`,
     )
     .then((res) => {
       return res;
@@ -41,7 +42,7 @@ export async function deleteFile(projectId, taskId, fileId) {
 export async function getPresignedUrl(projectId, taskId, fileName) {
   const url = await axios
     .post(
-      `http://localhost:5000/projects/${projectId}/tasks/${taskId}/upload-url`,
+      `${BASE_URL}/projects/${projectId}/tasks/${taskId}/upload-url`,
       { fileName },
     )
     .then((res) => {
@@ -54,7 +55,7 @@ export async function getPresignedUrl(projectId, taskId, fileName) {
 export async function getPresignedUrlFromEditor(projectId, taskId, fileName) {
   const url = await axios
     .post(
-      `http://localhost:5000/projects/${projectId}/tasks/${taskId}/upload-url-editor`,
+      `${BASE_URL}/projects/${projectId}/tasks/${taskId}/upload-url-editor`,
       { fileName },
     )
     .then((res) => {
@@ -68,7 +69,7 @@ export async function updateTask(projectId, updatedTask) {
   console.log('updatedTask', updatedTask);
   const res = await axios
     .put(
-      `http://localhost:5000/projects/${projectId}/tasks/${updatedTask._id}`,
+      `${BASE_URL}/projects/${projectId}/tasks/${updatedTask._id}`,
       {
         updatedTask,
       },
@@ -82,7 +83,7 @@ export async function updateTask(projectId, updatedTask) {
 
 export async function deleteTask(projectId, taskId) {
   const res = await axios
-    .delete(`http://localhost:5000/projects/${projectId}/tasks/${taskId}`)
+    .delete(`h${BASE_URL}/projects/${projectId}/tasks/${taskId}`)
     .then((res) => {
       return res;
     })
@@ -93,7 +94,7 @@ export async function deleteTask(projectId, taskId) {
 export async function createComment(projectId, taskId, description) {
   const res = await axios
     .post(
-      `http://localhost:5000/projects/${projectId}/tasks/${taskId}/comments`,
+      `${BASE_URL}/projects/${projectId}/tasks/${taskId}/comments`,
       { description },
     )
     .then((res) => {
@@ -106,7 +107,7 @@ export async function createComment(projectId, taskId, description) {
 export async function fetchNextComments(projectId, taskId, page) {
   const comments = await axios
     .get(
-      `http://localhost:5000/projects/${projectId}/tasks/${taskId}/comments`,
+      `${BASE_URL}/projects/${projectId}/tasks/${taskId}/comments`,
       { params: { page: page.current } },
     )
     .then((res) => {
@@ -119,7 +120,7 @@ export async function fetchNextComments(projectId, taskId, page) {
 export async function deleteComment(projectId, taskId, commentId) {
   const res = await axios
     .delete(
-      `http://localhost:5000/projects/${projectId}/tasks/${taskId}/comments/${commentId}`,
+      `${BASE_URL}/projects/${projectId}/tasks/${taskId}/comments/${commentId}`,
     )
     .then((res) => {
       return res;

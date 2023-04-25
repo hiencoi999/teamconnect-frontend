@@ -22,7 +22,6 @@ import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload.js';
 // import Indent from '@ckeditor/ckeditor5-indent/src/indent.js';
 import Link from '@ckeditor/ckeditor5-link/src/link.js';
 import List from '@ckeditor/ckeditor5-list/src/list.js';
-import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed.js';
 import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph.js';
 import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice.js';
 import Table from '@ckeditor/ckeditor5-table/src/table.js';
@@ -52,7 +51,7 @@ Editor.builtinPlugins = [
 	Italic,
 	Link,
 	List,
-	MediaEmbed,
+	// MediaEmbed,
 	Paragraph,
 	PasteFromOffice,
 	Table,
@@ -84,7 +83,7 @@ Editor.defaultConfig = {
 			'|',
 			'imageUpload',
 			'insertTable',
-			'mediaEmbed',
+			// 'mediaEmbed',
 			'codeBlock'
 		]
 	},

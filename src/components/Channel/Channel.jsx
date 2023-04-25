@@ -20,6 +20,7 @@ import dayjs from 'dayjs';
 import parse from 'html-react-parser';
 import { useEffect, useState } from 'react';
 import { ReactMultiEmail, isEmail } from 'react-multi-email';
+import { BASE_URL } from '../../constant';
 import './Channel.css';
 import { createMessage, getPresignedUrlFromChannel } from './apiCall';
 var calendar = require('dayjs/plugin/calendar');
@@ -114,7 +115,7 @@ const Channel = ({
 
   const fetchMessages = async () => {
     await axios
-      .get(`http://localhost:5000/channels/${channelId}/messages`, {
+      .get(`${BASE_URL}/channels/${channelId}/messages`, {
         params: { page: page.current },
       })
       .then((res) => {
@@ -131,7 +132,7 @@ const Channel = ({
 
   const fetchChannelAndMembers = async () => {
     await axios
-      .get(`http://localhost:5000/channels/${channelId}`)
+      .get(`${BASE_URL}/channels/${channelId}`)
       .then((res) => {
         setChannel(res.data.channel);
         setChannelMembers(res.data.members);
