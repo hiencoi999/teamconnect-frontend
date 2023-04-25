@@ -83,7 +83,7 @@ export async function updateTask(projectId, updatedTask) {
 
 export async function deleteTask(projectId, taskId) {
   const res = await axios
-    .delete(`h${BASE_URL}/projects/${projectId}/tasks/${taskId}`)
+    .delete(`${BASE_URL}/projects/${projectId}/tasks/${taskId}`)
     .then((res) => {
       return res;
     })
