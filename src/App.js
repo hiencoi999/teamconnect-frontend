@@ -2,7 +2,9 @@ import { ConfigProvider } from 'antd';
 import axios from 'axios';
 import React from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+// import {io} from 'socket.io-client';
 import socketIO from 'socket.io-client';
+import { BASE_URL } from './constant';
 import useAuth from './hooks/useAuth';
 import {
   Home,
@@ -12,9 +14,9 @@ import {
   Projects,
   Trash
 } from './screens';
-import { BASE_URL } from './constant';
 
-const socket = socketIO.connect(`${BASE_URL}`);
+const socket = socketIO.connect(BASE_URL);
+// const socket = socketIO.connect(`${BASE_URL}`);
 
 const App = () => {
   const { accessToken } = useAuth();
