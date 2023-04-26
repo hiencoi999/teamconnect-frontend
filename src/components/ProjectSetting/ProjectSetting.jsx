@@ -22,6 +22,7 @@ import moment from 'moment/moment';
 import { useState } from 'react';
 import { ReactMultiEmail, isEmail } from 'react-multi-email';
 import 'react-multi-email/dist/style.css';
+import { BASE_URL } from '../../constant';
 const { Text } = Typography;
 const columns = [
   {
@@ -122,7 +123,7 @@ const ProjectSetting = ({ project, members, fetchProjects, fetchChannels, fetchP
   };
   const senInvitationAPI = async () => {
     await axios
-      .post(`http://localhost:5000/projects/${projectId}/invitation`, {
+      .post(`${BASE_URL}/projects/${projectId}/invitation`, {
         projectId,
         emails,
       })
@@ -144,7 +145,7 @@ const ProjectSetting = ({ project, members, fetchProjects, fetchChannels, fetchP
   };
 
   const onNameChange = async (newName) => {
-    await axios.put(`http://localhost:5000/projects/${projectId}`, {newName})
+    await axios.put(`${BASE_URL}/projects/${projectId}`, {newName})
     .then(res => {
       fetchProjectDetail()
       fetchProjects()

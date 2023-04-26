@@ -12,8 +12,9 @@ import {
   Projects,
   Trash
 } from './screens';
+import { BASE_URL } from './constant';
 
-const socket = socketIO.connect('http://localhost:5000');
+const socket = socketIO.connect(`${BASE_URL}`);
 
 const App = () => {
   const { accessToken } = useAuth();
