@@ -1,7 +1,6 @@
 import { DeleteOutlined } from '@ant-design/icons';
 import {
   Avatar,
-  Button,
   Card,
   Empty,
   message,
@@ -16,7 +15,7 @@ import { BASE_URL } from '../../constant';
 const { Meta } = Card;
 
 const Projects = () => {
-  const [projects, fetchProjects] = useOutletContext();
+  const [projects, fetchProjects, fetchChannels] = useOutletContext();
   const [messageApi, contextHolder] = message.useMessage();
 
   async function handleDeleteProject(projectId) {
@@ -24,6 +23,7 @@ const Projects = () => {
       .delete(`${BASE_URL}/projects/${projectId}`)
       .then((res) => {
         fetchProjects();
+        fetchChannels()
       })
       .catch((error) => {
         if (error.response.status === 403) {
@@ -45,8 +45,6 @@ const Projects = () => {
       <div style={{ padding: 24 }}>
         {projects?.data?.length === 0 ? (
           <Empty description="No projects found">
-            {' '}
-            <Button type="primary">Create a project</Button>
           </Empty>
         ) : (
           <Space size={[16, 16]} wrap>
@@ -56,20 +54,6 @@ const Projects = () => {
                 className="card"
                 key={project._id}
                 style={{ width: 400, cursor: 'pointer' }}
-                actions={[
-                  <Popconfirm
-                    placement="bottom"
-                    title="Delete project"
-                    description="Are you sure to delete this project?"
-                    onConfirm={() => handleDeleteProject(project.project?._id)}
-                    okText="Yes"
-                    cancelText="No"
-                  >
-                    <Tooltip title="Move to trash" placement="bottom">
-                      <DeleteOutlined key="delete" />
-                    </Tooltip>
-                  </Popconfirm>,
-                ]}
               >
                 <Meta
                   avatar={
@@ -83,8 +67,22 @@ const Projects = () => {
                       {project.project.name}
                     </Link>
                   }
-                  description={moment(project.project?.createdAt).fromNow()}
+                  description={'Created: ' + moment(project.project?.createdAt).fromNow()}
                 />
+                {project.role === 'LEADER' ? (
+                  <Popconfirm
+                    placement="bottom"
+                    title="Delete project"
+                    description="Are you sure to delete this project?"
+                    onConfirm={() => handleDeleteProject(project.project?._id)}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Tooltip title="Move to trash" placement="bottom">
+                      <DeleteOutlined key="delete" />
+                    </Tooltip>
+                  </Popconfirm>
+                ) : null}
               </Card>
             ))}
           </Space>

@@ -1,20 +1,19 @@
 import {
   DeleteOutlined,
   EditOutlined,
-  MenuOutlined,
-  SendOutlined,
+  SendOutlined
 } from '@ant-design/icons';
 import {
   Alert,
   Button,
   Divider,
-  Dropdown,
   Image,
+  Popconfirm,
   Space,
   Table,
   Tag,
   Typography,
-  message,
+  message
 } from 'antd';
 import Title from 'antd/es/typography/Title';
 import axios from 'axios';
@@ -24,31 +23,6 @@ import { ReactMultiEmail, isEmail } from 'react-multi-email';
 import 'react-multi-email/dist/style.css';
 import { BASE_URL } from '../../constant';
 const { Text } = Typography;
-const columns = [
-  {
-    title: 'Member',
-    dataIndex: 'picture',
-  },
-  {
-    title: 'First Name',
-    dataIndex: 'firstName',
-  },
-  { title: 'Last Name', dataIndex: 'lastName' },
-  { title: 'Email', dataIndex: 'email' },
-  {
-    title: 'Role',
-    dataIndex: 'role',
-  },
-  {
-    title: 'Action',
-    key: 'action',
-    render: (_) => (
-      <Space size="middle">
-        <a>Remove</a>
-      </Space>
-    ),
-  },
-];
 
 const items = [
   {
@@ -74,14 +48,45 @@ const menuProps = {
   onClick: null,
 };
 
-const ProjectSetting = ({ project, members, fetchProjects, fetchChannels, fetchProjectDetail, socket }) => {
+const ProjectSetting = ({
+  project,
+  members,
+  fetchProjects,
+  fetchChannels,
+  fetchProjectDetail,
+  socket,
+}) => {
   let projectId = project?._id;
   const [messageApi, contextHolder] = message.useMessage();
   const [emails, setEmails] = useState([]);
 
+  const columns = [
+    {
+      title: 'Member',
+      dataIndex: 'picture',
+    },
+    {
+      title: 'First Name',
+      dataIndex: 'firstName',
+    },
+    { title: 'Last Name', dataIndex: 'lastName' },
+    { title: 'Email', dataIndex: 'email' },
+    {
+      title: 'Role',
+      dataIndex: 'role',
+    },
+  ];
+  const leader = members?.find((member) => member.role === 'LEADER');
+  if (leader.user.email === localStorage.getItem('email')) {
+    columns.push({
+      title: 'Action',
+      dataIndex: 'action',
+    });
+  }
+
   const data = [];
   members.map((member) => {
-    return data.push({
+    let item = {
       key: member._id,
       picture: (
         <img
@@ -99,7 +104,20 @@ const ProjectSetting = ({ project, members, fetchProjects, fetchChannels, fetchP
           {member.role}
         </Tag>
       ),
-    });
+      action: member.role === 'MEMBER' && (
+        <Popconfirm
+          placement="top"
+          title="Remove member"
+          description="Remove this member from project?"
+          onConfirm={() => onRemoveMember(member._id)}
+          okText="Yes"
+          cancelText="No"
+        >
+          <Button danger>Remove</Button>{' '}
+        </Popconfirm>
+      ),
+    };
+    return data.push(item);
   });
 
   const getLabel = (email, index, removeEmail) => {
@@ -145,14 +163,27 @@ const ProjectSetting = ({ project, members, fetchProjects, fetchChannels, fetchP
   };
 
   const onNameChange = async (newName) => {
-    await axios.put(`${BASE_URL}/projects/${projectId}`, {newName})
-    .then(res => {
-      fetchProjectDetail()
-      fetchProjects()
-      fetchChannels()
-    })
-    .catch(error => console.log(error))
-  }
+    await axios
+      .put(`${BASE_URL}/projects/${projectId}`, { newName })
+      .then((res) => {
+        fetchProjectDetail();
+        fetchProjects();
+        fetchChannels();
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const onRemoveMember = async (memberId) => {
+    await axios
+      .put(`${BASE_URL}/projects/${projectId}/members/${memberId}`)
+      .then((res) => {
+        fetchProjectDetail();
+      })
+      .catch((error) => {
+        console.log(error);
+        message.error('Action failed!');
+      });
+  };
 
   return (
     <div style={{ overflowY: 'auto', height: '80vh' }}>
@@ -195,9 +226,6 @@ const ProjectSetting = ({ project, members, fetchProjects, fetchChannels, fetchP
                 </Typography>
               </div>
             </Space>
-            <Dropdown menu={menuProps}>
-              <Button type="ghost" icon={<MenuOutlined />}></Button>
-            </Dropdown>
           </div>
           <Title
             level={5}

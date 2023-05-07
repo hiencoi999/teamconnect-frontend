@@ -1,12 +1,10 @@
 import {
   DeleteOutlined,
   KeyOutlined,
-  LaptopOutlined,
   LogoutOutlined,
   NumberOutlined,
   PlusOutlined,
-  ProjectOutlined,
-  SearchOutlined,
+  ProjectOutlined
 } from '@ant-design/icons';
 import {
   Avatar,
@@ -32,6 +30,7 @@ import useAuth from '../../hooks/useAuth';
 import './Home.css';
 const { Header, Content, Sider } = Layout;
 const { Option } = Select;
+
 function getItem(label, key, icon, children) {
   return {
     key,
@@ -114,7 +113,6 @@ const Home = ({ socket }) => {
     ? null
     : [
         getItem('Recent projects', 'sub1', <ProjectOutlined />, subItem1),
-        getItem('My Work', 'sub2', <LaptopOutlined />),
         getItem('Trash', 'sub3', <DeleteOutlined />),
         getItem('Sign Out', 'SIGN_OUT', <LogoutOutlined />),
       ];
@@ -122,12 +120,18 @@ const Home = ({ socket }) => {
   const channelItems = [];
   channels.forEach((channel) => {
     let channelList = [];
-    channel.channels.map((item) => {
+    let totalUnreadMessagesOfProject = 0;
+    channel.channels.forEach((item) => {
+      totalUnreadMessagesOfProject =
+        totalUnreadMessagesOfProject + item.unReadMessages;
       channelList.push(
         getItem(
           <Space>
-            <NumberOutlined />
+            <Badge count={item.unReadMessages} overflowCount={99} size="small">
+              <NumberOutlined />{' '}
+            </Badge>
             <strong>{item.channel.name}</strong>
+            {item.channel.isGlobal ? <KeyOutlined /> : null}
           </Space>,
           `${item.channel._id}`,
           null,
@@ -139,10 +143,16 @@ const Home = ({ socket }) => {
     channelItems.push(
       getItem(
         <Space>
-          <Avatar
+          <Badge
+            count={totalUnreadMessagesOfProject}
             size="small"
-            src={`${process.env.REACT_APP_PROJECT_AVATAR_URL}${channel?.project?.name}`}
-          />
+            overflowCount={99}
+          >
+            <Avatar
+              size="small"
+              src={`${process.env.REACT_APP_PROJECT_AVATAR_URL}${channel?.project?.name}`}
+            />
+          </Badge>
           <strong>{channel?.project?.name}</strong>
         </Space>,
         `${channel?.project?._id}`,
@@ -193,11 +203,10 @@ const Home = ({ socket }) => {
         fetchNotifications();
       }
     });
-    socket.on('new msg', function (data) {
-      console.log(data.msg);
-    });
-    socket.on('new noti', function (data) {
-      console.log(data.msg);
+    socket.on('getUnreadMessage', (email) => {
+      if (email) {
+        fetchChannels();
+      }
     });
   }, []);
 
@@ -256,12 +265,6 @@ const Home = ({ socket }) => {
               alignItems: 'center',
             }}
           >
-            <Input
-              placeholder="Search"
-              size="large"
-              prefix={<SearchOutlined className="site-form-item-icon" />}
-              style={{ width: '20vw', marginRight: '8px' }}
-            />
             <Badge
               count={countNotification}
               overflowCount={99}
@@ -484,7 +487,7 @@ const Home = ({ socket }) => {
                 height: '82vh',
                 overflowY: 'auto',
               }}
-              defaultOpenKeys={['global', 'private']}
+              defaultOpenKeys={[]}
               selectedKeys={null}
               mode="inline"
               items={channelItems}
@@ -499,6 +502,7 @@ const Home = ({ socket }) => {
                 page={page}
                 channelId={channelId}
                 socket={socket}
+                fetchChannels={fetchChannels}
               />
             ) : null}
           </Sider>

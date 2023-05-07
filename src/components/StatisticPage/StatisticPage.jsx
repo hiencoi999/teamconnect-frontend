@@ -1,83 +1,122 @@
-import { Bar, Pie } from '@ant-design/plots';
+import { Bar, Column, Pie } from '@ant-design/plots';
 import { Card } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { BASE_URL } from '../../constant';
+
+const colors = [
+  '#F7C04A',
+  '#3F497F',
+  '#DF7857',
+  '#617143',
+  '#D864A9',
+  '#C1AEFC',
+];
 const StatisticPage = () => {
-  const params = useParams();
+  const { projectId } = useParams();
   const [groups, setGroups] = useState();
-  console.log({groups})
+  const [assigneeGroups, setAssigneeGroup] = useState();
+  const [priorityGroups, setPriorityGroups] = useState();
   const fetchTaskGroups = async () => {
     await axios
-      .get(`${BASE_URL}/projects/${params.projectId}/tasks`, {params: {groupBy: "STATUS"}})
+      .get(`${BASE_URL}/projects/${projectId}/tasks`, {
+        params: { groupBy: 'STATUS' },
+      })
       .then((res) => {
-        console.log("A", res.data.tasks)
         setGroups(res.data.tasks);
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const fetchTaskGroupsByAssignee = async () => {
+    await axios
+      .get(`${BASE_URL}/projects/${projectId}/tasks`, {
+        params: { groupBy: 'ASSIGNEE' },
+      })
+      .then((res) => {
+        setAssigneeGroup(res.data.tasks);
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const fetchTaskGroupsByPriority = async () => {
+    await axios
+      .get(`${BASE_URL}/projects/${projectId}/tasks`, {
+        params: { groupBy: 'PRIORITY' },
+      })
+      .then((res) => {
+        setPriorityGroups(res.data.tasks);
       })
       .catch((error) => console.log(error));
   };
 
   useEffect(() => {
     fetchTaskGroups();
-  }, [params.projectId]);
+    fetchTaskGroupsByAssignee();
+    fetchTaskGroupsByPriority();
+  }, [projectId]);
 
-  const data = [];
+  const status = [];
 
   groups?.forEach((group) => {
-    data.push({
-      type: group.name,
-      value: group.tasks.length,
-    });
+    if (group.tasks.length) {
+      status.push({
+        name: group.name,
+        value: group.tasks.length,
+      });
+    }
   });
 
-  const data2 = [
-    {
-      action: '浏览网站',
-      pv: 50000,
-    },
-    {
-      action: '放入购物车',
-      pv: 35000,
-    },
-    {
-      action: '生成订单',
-      pv: 25000,
-    },
-    {
-      action: '支付订单',
-      pv: 15000,
-    },
-    {
-      action: '完成交易',
-      pv: 8500,
-    },
-  ];
+  // const pieColors = colors.slice(0, groups?.length - 2);
+  const assignees = [];
 
-  const config2 = {
-    data: data2,
-    xField: 'pv',
-    yField: 'action',
-    conversionTag: {},
-    // legend: {
-    //   position: 'top-left',
-    // },
-  };
+  assigneeGroups?.forEach((group) => {
+    if (group.tasks.length) {
+      assignees.push({
+        name: group.name,
+        count: group.tasks.length,
+      });
+    }
+  });
 
-  const config = {
+  const priorities = [];
+
+  priorityGroups?.forEach((group) => {
+    if (group.tasks.length) {
+      priorities.push({
+        priority: group.name,
+        count: group.tasks.length,
+      });
+    }
+  });
+
+  const statusConfig = {
     appendPadding: 10,
-    data,
+    data: status,
     angleField: 'value',
-    colorField: 'type',
+    colorField: 'name',
+    legend: {
+      position: 'top',
+    },
+    color: ({ name }) => {
+      if (name === 'To Do') {
+        return 'grey';
+      }
+      if (name === 'Done') {
+        return 'darkgreen';
+      }
+      return 'orange';
+    },
     radius: 1,
-    innerRadius: 0.5,
+    innerRadius: 0.3,
     label: {
       type: 'inner',
       offset: '-50%',
-      content: '{value} issues',
+      content: '{name} {value}',
       style: {
         textAlign: 'center',
-        fontSize: 14,
+        fontSize: 12,
       },
     },
     interactions: [
@@ -88,27 +127,80 @@ const StatisticPage = () => {
         type: 'element-active',
       },
     ],
-    // statistic: {
-    //   title: false,
-    //   content: {
-    //     style: {
-    //       whiteSpace: 'pre-wrap',
-    //       overflow: 'hidden',
-    //       textOverflow: 'ellipsis',
-    //     },
-    //     content: 'AntV\nG2Plot',
-    //   },
-    // },
   };
+
+  const assigneeConfig = {
+    data: assignees,
+    minBarWidth: 40,
+    maxBarWidth: 100,
+    xField: 'count',
+    yField: 'name',
+    seriesField: 'name',
+    colors: colors,
+    marginRatio: 0,
+    legend: {
+      position: 'top',
+      offsetX: 0,
+    },
+    label: {
+      content: (obj) => {
+        if (obj.count < 2) return obj.count + ' task';
+        return obj.count + ' tasks';
+      },
+      style: {
+        autoEllipsis: false,
+      },
+    },
+  };
+
+  const priorityConfig = {
+    data: priorities,
+    maxColumnWidth: 100,
+    xField: 'priority',
+    yField: 'count',
+    colorField: 'priority',
+    color: ({priority}) => {
+      if(priority === 'Highest') return 'red';
+      if(priority === 'High') return 'orange';
+      if(priority === 'Medium') return 'grey';
+      if(priority === 'Low') return 'cyan';
+      return 'blue'
+    },
+    // marginRatio: 0,
+    label: {
+      content: (obj) => {
+        if (obj.count < 2) return obj.count + ' task';
+        return obj.count + ' tasks';
+      },
+    },
+  };
+
   return (
-    <div className='flex-row-center' style={{width: '100%'}}>
-      <Card title="Status overview" style={{minWidth: '30vw', marginRight: '24px'}}>
-        <Pie {...config} />
+    <>
+      <div className="flex-row-space-bt" style={{ width: '100%' }}>
+        <Card
+          title="Status overview"
+          style={{
+            width: '48%',
+            background: '#E7F6F2',
+          }}
+        >
+          <Pie {...statusConfig} />
+        </Card>
+        <Card
+          title="Workload overview"
+          style={{ width: '48%', background: '#E7F6F2' }}
+        >
+          <Bar {...assigneeConfig} />
+        </Card>
+      </div>
+      <Card
+        title="Priority overview"
+        style={{ width: '100%', marginTop: '24px', background: '#E7F6F2' }}
+      >
+        <Column {...priorityConfig} />
       </Card>
-      <Card title="Workload overview" style={{minWidth: '30vw'}}>
-        <Bar {...config2} />
-      </Card>
-    </div>
+    </>
   );
 };
 

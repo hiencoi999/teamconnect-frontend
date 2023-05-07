@@ -16,7 +16,6 @@ import {
 } from './screens';
 
 const socket = socketIO.connect(BASE_URL);
-// const socket = socketIO.connect(`${BASE_URL}`);
 
 const App = () => {
   const { accessToken } = useAuth();

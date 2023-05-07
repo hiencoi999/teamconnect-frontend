@@ -25,7 +25,7 @@ const NotificationDrawer = (props) => {
       .then((res) => {
         props.fetchNotifications()
         props.fetchProjects()
-        props.fetchChannel()
+        props.fetchChannels()
       })
       .catch((error) => {
         console.log(error);

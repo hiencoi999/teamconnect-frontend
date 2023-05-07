@@ -8,7 +8,6 @@ const { Meta } = Card;
 
 const Trash = () => {
   const [deletedProjects, setDeletedProjects] = useState();
-  console.log({deletedProjects})
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
@@ -22,6 +21,18 @@ const Trash = () => {
     }
     fetchDeletedProject();
   }, []);
+
+  const onRestoreProject = async (projectId) => {
+    await axios
+      .put(`${BASE_URL}/projects/deleted/${projectId}`)
+      .then((res) => {
+        message.success('Restore project successfully');
+      })
+      .catch((error) => {
+        console.log(error);
+        message.error('Action failed!');
+      });
+  };
 
   return !deletedProjects ? (
     <p>loading</p>
@@ -40,9 +51,10 @@ const Trash = () => {
                 actions={[
                   <Popconfirm
                     placement="bottom"
-                    title="Delete project"
-                    description="Are you sure to delete this project?"
+                    title="Restore project"
+                    description="Restore this project?"
                     okText="Yes"
+                    onConfirm={() => onRestoreProject(project.project._id)}
                     cancelText="No"
                   >
                     <Tooltip title="Restore this project" placement="bottom">

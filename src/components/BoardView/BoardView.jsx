@@ -15,6 +15,7 @@ import {
   Space,
   Tag,
   Typography,
+  message,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import axios from 'axios';
@@ -29,7 +30,6 @@ import TaskDetail from '../TaskDetail/TaskDetail';
 import { getColorPriority } from '../TaskDetail/TaskDetail.config';
 import './BoardView.css';
 const { Text } = Typography;
-const { Search } = Input;
 dayjs.extend(relativeTime);
 
 const BoardView = ({ project, members, socket }) => {
@@ -46,9 +46,10 @@ const BoardView = ({ project, members, socket }) => {
   const [searchValue, setSearchValue] = useState('');
   const groupBy = useRef('STATUS');
   const page = useRef(1);
+
   const onDragEnd = async (result, columns, setColumns) => {
-    if(searchValue !== "") return;
-    if (!result.destination) return;
+    if (searchValue !== '' || !result.destination) return;
+    // if () return;
     const { source, destination } = result;
     if (result.type === 'group') {
       const [movedItem] = columns.splice(source.index, 1);
@@ -64,7 +65,6 @@ const BoardView = ({ project, members, socket }) => {
         .catch((error) => console.log(error));
     } else {
       if (source.droppableId !== destination.droppableId) {
-        console.log({ source, destination });
         let [sourceColumn] = columns.filter(
           (column) => column._id === source.droppableId,
         );
@@ -73,7 +73,6 @@ const BoardView = ({ project, members, socket }) => {
         );
         const [movedItem] = sourceColumn.tasks.splice(source.index, 1);
         destColumn.tasks.splice(destination.index, 0, movedItem);
-        console.log({ columns });
         await axios
           .put(`${BASE_URL}/projects/${projectId}/tasks`, {
             columns,
@@ -82,7 +81,7 @@ const BoardView = ({ project, members, socket }) => {
             newGroupId: destination.droppableId,
           })
           .then((res) => {
-            if (res.status === 200) fetchTaskGroups();
+            // if (res.status === 200) fetchTaskGroups();
           })
           .catch((error) => console.log(error));
       } else {
@@ -104,9 +103,9 @@ const BoardView = ({ project, members, socket }) => {
           })
           .catch((error) => console.log(error));
       }
-      setIsUpdated(!isUpdated);
-      socket?.emit('updateBoard', members);
     }
+    setIsUpdated(!isUpdated);
+    socket?.emit('updateBoard', members);
   };
 
   const onTaskTitleChange = (e) => {
@@ -179,7 +178,11 @@ const BoardView = ({ project, members, socket }) => {
       .then((res) => {
         fetchTaskGroups();
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error);
+        message.warning('Action failed!');
+      });
+    socket?.emit('updateBoard', members);
   };
 
   return (
@@ -307,7 +310,10 @@ const BoardView = ({ project, members, socket }) => {
                                                         >
                                                           {(item.title.includes(
                                                             searchValue,
-                                                          ) || `#${item.key}`.includes(searchValue)) && (
+                                                          ) ||
+                                                            `#${item.key}`.includes(
+                                                              searchValue,
+                                                            )) && (
                                                             <Badge.Ribbon
                                                               text={
                                                                 `#${item.key}` +
@@ -523,7 +529,12 @@ const BoardView = ({ project, members, socket }) => {
                             setOpenGroupPopover(newOpen)
                           }
                         >
-                          <Button style={{width: '100%'}} icon={<PlusOutlined />}>Add more columns</Button>
+                          <Button
+                            style={{ width: '100%' }}
+                            icon={<PlusOutlined />}
+                          >
+                            Add more columns
+                          </Button>
                         </Popover>
                       )}
                     </Space>

@@ -1,7 +1,7 @@
 import {
   ArrowRightOutlined,
-  MenuOutlined,
   NumberOutlined,
+  PlusOutlined,
 } from '@ant-design/icons';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
@@ -9,47 +9,25 @@ import {
   Button,
   Card,
   Divider,
-  Dropdown,
+  Drawer,
   Modal,
+  Popconfirm,
   Tooltip,
   Typography,
+  message,
 } from 'antd';
 import axios from 'axios';
 import Editor from 'ckeditor5-custom-build/build/ckeditor';
 import dayjs from 'dayjs';
 import parse from 'html-react-parser';
 import { useEffect, useState } from 'react';
-import { ReactMultiEmail, isEmail } from 'react-multi-email';
 import { BASE_URL } from '../../constant';
+import AddChannel from './AddChannel';
 import './Channel.css';
 import { createMessage, getPresignedUrlFromChannel } from './apiCall';
 var calendar = require('dayjs/plugin/calendar');
 dayjs.extend(calendar);
 const { Text } = Typography;
-
-const items = [
-  // {
-  //   label: (
-  //     <Text>
-  //       <EditOutlined /> Rename
-  //     </Text>
-  //   ),
-  //   key: '1',
-  // },
-  {
-    label: (
-      <Text style={{ color: 'red' }}>
-        <ArrowRightOutlined /> Leave channel
-      </Text>
-    ),
-    key: '2',
-  },
-];
-
-const menuProps = {
-  items,
-  onClick: null,
-};
 
 const Channel = ({
   setChannelId,
@@ -58,32 +36,13 @@ const Channel = ({
   page,
   channelId,
   socket,
+  fetchChannels,
 }) => {
   const [channel, setChannel] = useState();
   const [channelMembers, setChannelMembers] = useState();
-  const [emails, setEmails] = useState();
   const [description, setDescription] = useState();
   const [messages, setMessages] = useState([]);
-
-  const getLabel = (email, index, removeEmail) => {
-    return (
-      <div
-        style={{ backgroundColor: '#005566', color: 'white' }}
-        data-tag
-        key={index}
-      >
-        {email}
-        <span
-          data-tag-handle
-          onClick={() => {
-            removeEmail(index);
-          }}
-        >
-          ×
-        </span>
-      </div>
-    );
-  };
+  const [openAddMember, setOpenAddMember] = useState(false);
 
   function uploadAdapter(loader) {
     return {
@@ -142,16 +101,15 @@ const Channel = ({
 
   useEffect(() => {
     socket?.on('getMessage', (email) => {
-      console.log({ email });
-      if (email) fetchMessages();
+      if (email) {
+        fetchMessages();
+      }
     });
   }, []);
 
   useEffect(() => {
     fetchChannelAndMembers();
-  }, [channelId]);
-
-  useEffect(() => {
+    updateReadMessage();
     fetchMessages();
   }, [channelId]);
 
@@ -176,18 +134,36 @@ const Channel = ({
     }
   };
 
+  const leaveChannel = async () => {
+    await axios
+      .delete(`${BASE_URL}/channels/${channelId}/members`)
+      .then((res) => {
+        if (res.status === 200) message.success('You left this channel');
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const updateReadMessage = async () => {
+    await axios
+      .put(`${BASE_URL}/channels/${channelId}`)
+      .then()
+      .catch((error) => console.log(error));
+  };
+
   return (
     channel && (
       <Modal
-        width="80vw"
+        width="86vw"
         style={{ top: 20 }}
         open={openChannel}
         footer={<br />}
         onCancel={() => {
           setDescription('');
           setChannelId();
+          updateReadMessage();
           setOpenChannel(false);
           page.current = 1;
+          fetchChannels();
         }}
       >
         <br />
@@ -207,12 +183,24 @@ const Channel = ({
                 >
                   {channelMembers.map((member, index) => {
                     return (
-                      <Tooltip key={index} title={member.user.email} placement="top">
+                      <Tooltip
+                        key={index}
+                        title={member.user.email}
+                        placement="top"
+                      >
                         <Avatar src={member.user.picture} />
                       </Tooltip>
                     );
                   })}
                 </Avatar.Group>
+                {!channel.isGlobal && (
+                  <Button
+                    shape="circle"
+                    size={'small'}
+                    icon={<PlusOutlined />}
+                    onClick={() => setOpenAddMember(true)}
+                  />
+                )}
               </div>
               <div
                 style={{
@@ -221,119 +209,141 @@ const Channel = ({
                   textAlign: 'center',
                   display: 'flex',
                 }}
-              >
-                <ReactMultiEmail
-                  focused="true"
-                  placeholder="Add new emails..."
-                  autoFocus={true}
-                  emails={emails}
-                  onChange={(_emails) => {
-                    setEmails(_emails);
-                  }}
-                  validateEmail={(email) => {
-                    return isEmail(email); // return boolean
-                  }}
-                  getLabel={getLabel}
-                />
-              </div>
-              <Dropdown menu={menuProps}>
-                <Button type="ghost">
-                  <MenuOutlined />
-                </Button>
-              </Dropdown>
+              ></div>
+
+              {!channel.isGlobal && (
+                <Popconfirm
+                  placement="bottom"
+                  title="Leave channel"
+                  description="Leave this channel?"
+                  onConfirm={() => leaveChannel()}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button danger>
+                    <ArrowRightOutlined />
+                    Leave channel
+                  </Button>
+                </Popconfirm>
+              )}
             </div>
           }
           style={{ width: '100%', background: 'darkgrey' }}
           bodyStyle={{ padding: 0, height: '70vh', background: 'white' }}
         >
-          {messages && (
+          <>
+            <Drawer
+              title="Select members"
+              placement="bottom"
+              closable={false}
+              onClose={() => {
+                setOpenAddMember(false);
+                fetchChannelAndMembers();
+              }}
+              open={openAddMember}
+              getContainer={false}
+            >
+              <AddChannel channel={channel} channelMembers={channelMembers} />
+            </Drawer>
+            {messages && (
+              <div
+                style={{
+                  height: '60vh',
+                  overflow: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column-reverse',
+                }}
+                onScroll={(e) => {
+                  if (messages.length) {
+                    const top =
+                      e.target.scrollHeight + e.target.scrollTop <=
+                      e.target.clientHeight;
+                    if (top) {
+                      page.current = page.current + 1;
+                      fetchMessages();
+                    }
+                  }
+                }}
+              >
+                {messages.map((comm, index) => {
+                  return (
+                    <>
+                      <div
+                        key={index}
+                        className="flex-row-start"
+                        style={{ width: '100%' }}
+                      >
+                        <img
+                          src={comm.user.picture}
+                          alt=""
+                          referrerPolicy="no-referrer"
+                          style={{
+                            height: '2rem',
+                            borderRadius: '10%',
+                            margin: '4px',
+                          }}
+                        ></img>
+                        <div
+                          className="ck-content "
+                          style={{ maxWidth: '90%' }}
+                        >
+                          <Text strong>
+                            {comm.user.firstName + ' ' + comm.user.lastName}
+                          </Text>
+                          <Text>{parse(`${comm.description}`)}</Text>
+                        </div>
+                      </div>
+                      <Divider orientation="right">
+                        <Text italic>
+                          {dayjs(comm.createdAt).calendar(dayjs())}
+                        </Text>
+                      </Divider>
+                    </>
+                  );
+                })}
+              </div>
+            )}
             <div
               style={{
-                height: '60vh',
-                overflow: 'auto',
-                display: 'flex',
-                flexDirection: 'column-reverse',
-              }}
-              onScroll={(e) => {
-                if (messages.length) {
-                  const top =
-                    e.target.scrollHeight + e.target.scrollTop <=
-                    e.target.clientHeight;
-                  if (top) {
-                    // setPage((page) => page + 1);
-                    page.current = page.current + 1;
-                    fetchMessages();
-                  }
-                }
+                position: 'absolute',
+                bottom: 0,
+                width: '100%',
+                height: '10vh',
               }}
             >
-              {messages.map((comm, index) => {
-                return (
-                  <>
-                    <div
-                      key={index}
-                      className="flex-row-start"
-                      style={{ width: '100%' }}
-                    >
-                      <img
-                        src={comm.user.picture}
-                        alt=""
-                        referrerPolicy="no-referrer"
-                        style={{
-                          height: '2rem',
-                          borderRadius: '10%',
-                          margin: '4px',
-                        }}
-                      ></img>
-                      <div className="ck-content " style={{ maxWidth: '90%' }}>
-                        <Text strong>
-                          {comm.user.firstName + ' ' + comm.user.lastName}
-                        </Text>
-                        <Text>{parse(`${comm.description}`)}</Text>
-                      </div>
-                    </div>
-                    <Divider orientation="right">
-                      <Text italic>
-                        {dayjs(comm.createdAt).calendar(dayjs())}
-                      </Text>
-                    </Divider>
-                  </>
-                );
-              })}
+              <CKEditor
+                key={2}
+                editor={Editor}
+                data={description}
+                config={{
+                  toolbar: [
+                    'bold',
+                    'italic',
+                    'underline',
+                    'link',
+                    'imageUpload',
+                    'codeBlock',
+                  ],
+                  extraPlugins: [uploadPlugin],
+                  placeholder: 'Type something...',
+                }}
+                onReady={(editor) => {
+                  editor.model.change((writer) => {
+                    writer.setSelection(editor.model.document.getRoot(), 'end');
+                  });
+                  editor.editing.view.focus();
+                  editor.keystrokes.set('Enter', (data, stop) => {
+                    handleKeyDown(data.domEvent, editor);
+                    stop();
+                  });
+                }}
+                onChange={(event, editor) => {
+                  const message = editor.getData();
+                  setDescription(message);
+                }}
+              />
             </div>
-          )}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              width: '100%',
-              height: '10vh',
-            }}
-          >
-            <CKEditor
-              key={2}
-              editor={Editor}
-              data={description}
-              config={{
-                extraPlugins: [uploadPlugin],
-                placeholder: 'Type something...',
-              }}
-              onReady={(editor) => {
-                editor.model.change((writer) => {
-                  writer.setSelection(editor.model.document.getRoot(), 'end');
-                });
-                editor.editing.view.focus();
-                editor.keystrokes.set('Enter', (data, stop) => {
-                  handleKeyDown(data.domEvent, editor);
-                  stop();
-                });
-              }}
-              onChange={(event, editor) => {
-                const message = editor.getData();
-                setDescription(message);
-              }}
-            />
-          </div>
+          </>
         </Card>
       </Modal>
     )
