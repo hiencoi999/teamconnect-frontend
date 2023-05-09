@@ -64,7 +64,10 @@ const AddChannel = ({ channel, channelMembers }) => {
   const onAddNewMember = async (userId, channelId) => {
     await axios
       .post(`${BASE_URL}/channels/${channelId}/members`, { userId })
-      .then((res) => message.success('success'))
+      .then((res) => {
+        fetchProjectMembers();
+        message.success('success');
+      })
       .catch((error) => console.log(error));
   };
 

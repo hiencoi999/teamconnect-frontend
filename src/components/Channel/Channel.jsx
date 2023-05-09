@@ -109,7 +109,7 @@ const Channel = ({
 
   useEffect(() => {
     fetchChannelAndMembers();
-    updateReadMessage();
+    // updateReadMessage();
     fetchMessages();
   }, [channelId]);
 
@@ -144,9 +144,10 @@ const Channel = ({
   };
 
   const updateReadMessage = async () => {
+    console.log('cancel');
     await axios
       .put(`${BASE_URL}/channels/${channelId}`)
-      .then()
+      .then((res) => fetchChannels())
       .catch((error) => console.log(error));
   };
 
@@ -163,7 +164,6 @@ const Channel = ({
           updateReadMessage();
           setOpenChannel(false);
           page.current = 1;
-          fetchChannels();
         }}
       >
         <br />
@@ -243,7 +243,7 @@ const Channel = ({
               open={openAddMember}
               getContainer={false}
             >
-              <AddChannel channel={channel} channelMembers={channelMembers} />
+              <AddChannel channel={channel} channelMembers={channelMembers} fetchChannels={fetchChannels} />
             </Drawer>
             {messages && (
               <div
