@@ -129,6 +129,7 @@ const BoardView = ({ project, members, socket }) => {
         }
       })
       .catch((error) => console.log(error));
+      socket?.emit('updateBoard', members);
   };
 
   const fetchTaskGroups = async () => {

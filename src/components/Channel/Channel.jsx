@@ -243,7 +243,7 @@ const Channel = ({
               open={openAddMember}
               getContainer={false}
             >
-              <AddChannel channel={channel} channelMembers={channelMembers} fetchChannels={fetchChannels} />
+              <AddChannel channel={channel} channelMembers={channelMembers} />
             </Drawer>
             {messages && (
               <div
